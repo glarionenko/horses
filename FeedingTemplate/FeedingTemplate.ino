@@ -123,6 +123,7 @@ void loop()
 {
   modbus_update();
   if (cmd_changed()) {
+    
     //move_it()
   }
 }
