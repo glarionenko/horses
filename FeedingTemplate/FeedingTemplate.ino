@@ -12,17 +12,20 @@ enum
 {
   // just add or remove registers and your good to go...
   // The first register starts at address 0
-  ENABLING,
-  ROTATION,
-  STATE_NOW,
-  LAST_COMMAND,
+  ENABLING,// OUT is avaliable
+  ROTATION,// IN direction, 2 - up, 3 - down, 1 - stop
+  STATE_NOW,//1 - stopped; 4 - moving, 2 - up, 3 - down
+  LAST_COMMAND, //last change
+  DOWN_TIME,
+  UP_tiME,
+  MAX_SPEED,
   HOLDING_REGS_SIZE // leave this one
   // total number of registers for function 3 and 16 share the same register array
   // i.e. the same address space
 };
 
 unsigned int holdingRegs[HOLDING_REGS_SIZE]; // function 3 and 16 register array
-
+int rotation_cmd = 0;
 void setup()
 {
   //объявить пин для датчика холла
@@ -36,7 +39,9 @@ void setup()
   pinMode(LED, OUTPUT);
   modbus_configure(&Serial, 4800, SERIAL_8N2, 2, 7, HOLDING_REGS_SIZE, holdingRegs);
   modbus_update_comms(4800, SERIAL_8N2, 2);
-
+  //проверить наличие геркона, если нет, то поискать и сообщить, что его нет в ENABLED =0
+  holdingRegs[ENABLED] = 1; //0x1
+  //
 }
 unsigned long motion_started = 0;
 int time_for_motion_down = 3000;
@@ -52,15 +57,15 @@ boolean checkHall() {
   //добавить повторную проверку
   return digitalRead(END_SWITCH);
 }
-boolean motion_allowed(int dir) { //0 - down, 1 - up
+boolean motion_allowed(int dir) { //3 - down, 2 - up
   boolean allowed = false;
   switch (dir) {
-    case 2:
+    case 3:
       if (checkTime(motion_started, time_for_motion_down)) {
         allowed = true;
       }
       break;
-    case 1:
+    case 2:
       if (checkHall && checkTime(motion_started, time_for_motion_up)) {
         allowed = true;
       }
@@ -68,11 +73,17 @@ boolean motion_allowed(int dir) { //0 - down, 1 - up
   }
   return allowed;
 }
-void loop()
-{
-  modbus_update();
-  switch (holdingRegs[ROTATION]) {
-    case 0:
+boolean cmd_changed() {
+  boolean changed = false;
+  if ((holdingRegs[ROTATION] != 0) && (holdingRegs[ROTATION] != holdingRegs[LAST_COMMAND])) {
+    changed = true;
+    holdingRegs[LAST_COMMAND] = holdingRegs[ROTATION];
+  }
+  return changed;
+}
+void move_it(int _rotation_cmd) {
+  switch (_rotation_cmd) {
+    case 1:
       analogWrite(PWM_M, 0);
       delay(1000);//время на выключение питания
       digitalWrite(UP_M, 0);
@@ -80,26 +91,38 @@ void loop()
       digitalWrite(13, 0);
       //now_sp = 100;
       break;
-    case 1:
-      //      if ((now_sp < 250) && (millis() - last_update > timer1)) {
-      //        now_sp++;
-      //        last_update = millis();
-      //      }
-      analogWrite(PWM_M, 250);//now_sp
-      delay(500);
-      digitalWrite(UP_M, 1);
-      digitalWrite(13, 1);
-      break;
     case 2:
       //      if ((now_sp < 250) && (millis() - last_update > timer1)) {
       //        now_sp++;
       //        last_update = millis();
       //      }
-      analogWrite(PWM_M, 250);//now_sp
-      delay(500);
-      digitalWrite(DOWN_M, 1);
-      digitalWrite(13, 1);
+      if (motion_allowed(_rotation_cmd)) {
+        analogWrite(PWM_M, 250);//now_sp
+        delay(500);
+        digitalWrite(UP_M, 1);
+        digitalWrite(13, 1);
+      }
+      break;
+    case 3:
+      //      if ((now_sp < 250) && (millis() - last_update > timer1)) {
+      //        now_sp++;
+      //        last_update = millis();
+      //      }
+      if (motion_allowed(_rotation_cmd)) {
+        analogWrite(PWM_M, 250);//now_sp
+        delay(500);
+        digitalWrite(DOWN_M, 1);
+        digitalWrite(13, 1);
+      }
       break;
 
+  }
+
+}
+void loop()
+{
+  modbus_update();
+  if (cmd_changed()) {
+    //move_it()
   }
 }
