@@ -1,5 +1,5 @@
 #include <SimpleModbusSlave.h>
-
+#define MODBUS_ID 1
 #define LED 13
 #define PWM_M 5
 #define UP_M A2
@@ -37,10 +37,10 @@ void setup()
   digitalWrite(DOWN_M, 0);
   digitalWrite(PWM_M, 0);
   pinMode(LED, OUTPUT);
-  modbus_configure(&Serial, 4800, SERIAL_8N2, 2, 7, HOLDING_REGS_SIZE, holdingRegs);
-  modbus_update_comms(4800, SERIAL_8N2, 2);
+  modbus_configure(&Serial, 4800, SERIAL_8N2, MODBUS_ID, 7, HOLDING_REGS_SIZE, holdingRegs);
+  modbus_update_comms(4800, SERIAL_8N2, MODBUS_ID);
   //проверить наличие геркона, если нет, то поискать и сообщить, что его нет в ENABLED =0
-  holdingRegs[ENABLED] = 1; //0x1
+  holdingRegs[ENABLING] = 1; //0x1
   //
 }
 unsigned long motion_started = 0;
@@ -123,7 +123,6 @@ void loop()
 {
   modbus_update();
   if (cmd_changed()) {
-    
-    //move_it()
+    move_it(holdingRegs[ROTATION]);
   }
 }
