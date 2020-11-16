@@ -73,12 +73,15 @@ boolean motion_allowed(int dir) { //3 - down, 2 - up
       }
       break;
     case 2:
-      if (checkHall && checkTime(motion_started, time_for_motion_up)) {
+      if (checkHall() && checkTime(motion_started, time_for_motion_up)) {
         allowed = true;
       } else {
         started = 0;
       }
       break;
+  }
+  if (!allowed) {
+    stop_moving();
   }
   //allowed = true;
   return allowed;
@@ -95,11 +98,7 @@ boolean cmd_changed() {
 void move_it(int _rotation_cmd) {
   switch (_rotation_cmd) {
     case 1:
-      analogWrite(PWM_M, 0);
-      delay(1000);//время на выключение питания
-      digitalWrite(UP_M, 0);
-      digitalWrite(DOWN_M, 0);
-      digitalWrite(13, 0);
+
       //now_sp = 100;
       break;
     case 2:
@@ -108,11 +107,13 @@ void move_it(int _rotation_cmd) {
       //        last_update = millis();
       //      }
       if (motion_allowed(_rotation_cmd)) {
-        
+
         digitalWrite(UP_M, 1);
         digitalWrite(13, 1);
         delay(500);
         analogWrite(PWM_M, 250);//now_sp
+      } else {
+
       }
       break;
     case 3:
@@ -121,7 +122,7 @@ void move_it(int _rotation_cmd) {
       //        last_update = millis();
       //      }
       if (motion_allowed(_rotation_cmd)) {
-        
+
         digitalWrite(DOWN_M, 1);
         digitalWrite(13, 1);
         delay(500);
@@ -132,7 +133,15 @@ void move_it(int _rotation_cmd) {
   }
 
 }
+void stop_moving() {
 
+  analogWrite(PWM_M, 0);
+  delay(100);
+  digitalWrite(UP_M, 0);
+  digitalWrite(DOWN_M, 0);
+  digitalWrite(13, 0);
+  delay(100);
+}
 void loop()
 {
   modbus_update();
@@ -142,11 +151,14 @@ void loop()
     digitalWrite(UP_M, 0);
     digitalWrite(DOWN_M, 0);
     started = 1;
-    motion_started=millis();
+    motion_started = millis();
   }
-//  if (started) {
-//    
-//  }
-  move_it(holdingRegs[ROTATION]);
+  //check it, if not moving
+  if (started) {
+    move_it(holdingRegs[ROTATION]);
+  } else {
+    stop_moving();
+  }
+
 
 }
