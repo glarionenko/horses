@@ -1,13 +1,16 @@
+#include <Ethernet.h>
+
 #include <SimpleModbusSlave.h>
 #define MODBUS_ID 1
+
 #define LED 13
 #define PWM_M 5
 #define UP_M A2
 #define DOWN_M A3
 #define END_SWITCH 3
 
-boolean endSwitchStopValue = true;
-
+boolean endSwitchStopValue = false;
+boolean started = 0;
 enum
 {
   // just add or remove registers and your good to go...
@@ -55,22 +58,29 @@ boolean checkTime(unsigned long started, int timer) {
 }
 boolean checkHall() {
   //добавить повторную проверку
-  return digitalRead(END_SWITCH);
+  //return digitalRead(END_SWITCH);
+  return true;
 }
 boolean motion_allowed(int dir) { //3 - down, 2 - up
   boolean allowed = false;
+
   switch (dir) {
     case 3:
       if (checkTime(motion_started, time_for_motion_down)) {
         allowed = true;
+      } else {
+        started = 0;
       }
       break;
     case 2:
       if (checkHall && checkTime(motion_started, time_for_motion_up)) {
         allowed = true;
+      } else {
+        started = 0;
       }
       break;
   }
+  //allowed = true;
   return allowed;
 }
 boolean cmd_changed() {
@@ -78,6 +88,7 @@ boolean cmd_changed() {
   if ((holdingRegs[ROTATION] != 0) && (holdingRegs[ROTATION] != holdingRegs[LAST_COMMAND])) {
     changed = true;
     holdingRegs[LAST_COMMAND] = holdingRegs[ROTATION];
+
   }
   return changed;
 }
@@ -97,10 +108,11 @@ void move_it(int _rotation_cmd) {
       //        last_update = millis();
       //      }
       if (motion_allowed(_rotation_cmd)) {
-        analogWrite(PWM_M, 250);//now_sp
-        delay(500);
+        
         digitalWrite(UP_M, 1);
         digitalWrite(13, 1);
+        delay(500);
+        analogWrite(PWM_M, 250);//now_sp
       }
       break;
     case 3:
@@ -109,20 +121,32 @@ void move_it(int _rotation_cmd) {
       //        last_update = millis();
       //      }
       if (motion_allowed(_rotation_cmd)) {
-        analogWrite(PWM_M, 250);//now_sp
-        delay(500);
+        
         digitalWrite(DOWN_M, 1);
         digitalWrite(13, 1);
+        delay(500);
+        analogWrite(PWM_M, 250);
       }
       break;
 
   }
 
 }
+
 void loop()
 {
   modbus_update();
   if (cmd_changed()) {
-    move_it(holdingRegs[ROTATION]);
+    analogWrite(PWM_M, 0);
+    delay(100);
+    digitalWrite(UP_M, 0);
+    digitalWrite(DOWN_M, 0);
+    started = 1;
+    motion_started=millis();
   }
+//  if (started) {
+//    
+//  }
+  move_it(holdingRegs[ROTATION]);
+
 }
