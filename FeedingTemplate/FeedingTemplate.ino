@@ -5,8 +5,8 @@
 
 #define LED 13
 #define PWM_M 5
-#define UP_M A2
-#define DOWN_M A3
+#define UP_M A3
+#define DOWN_M A2
 #define END_SWITCH 3
 
 boolean endSwitchStopValue = false;
@@ -32,7 +32,7 @@ int rotation_cmd = 0;
 void setup()
 {
   //объявить пин для датчика холла
-  pinMode(END_SWITCH, INPUT);
+  pinMode(END_SWITCH, INPUT_PULLUP);
   pinMode(PWM_M, OUTPUT);
   pinMode(UP_M, OUTPUT);
   pinMode(DOWN_M, OUTPUT);
@@ -59,7 +59,11 @@ boolean checkTime(unsigned long started, int timer) {
 boolean checkHall() {
   //добавить повторную проверку
   //return digitalRead(END_SWITCH);
-  return true;
+  boolean can_move=0;
+  if(digitalRead(END_SWITCH)!=endSwitchStopValue){
+    can_move=1;
+    }
+  return can_move;
 }
 boolean motion_allowed(int dir) { //3 - down, 2 - up
   boolean allowed = false;
