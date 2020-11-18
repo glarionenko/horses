@@ -153,11 +153,11 @@ boolean cmd_changed() {
   return changed;
 }
 int max_sp = 250;
-int min_sp = 30;
+int min_sp = 120;
 int now_sp;
 int stop_in = 2000;
 int step_time = stop_in / (max_sp - min_sp); // время через которое скорость упадет на 1
-int start_stopping_at = 3000;
+int start_stopping_at = 5000;
 unsigned long last_update;
 boolean in_progress = 0;
 void move_it(int _rotation_cmd) {
@@ -171,7 +171,7 @@ void move_it(int _rotation_cmd) {
 
       if (millis() - motion_started > start_stopping_at) {
 
-        if ((now_sp > min_sp) && (now_sp < max_sp) && (millis() - last_update > step_time)) {
+        if ((now_sp > min_sp) && (millis() - last_update > step_time)) {
           now_sp--;
           last_update = millis();
         }
@@ -232,10 +232,11 @@ void loop()
   modbus_update();
   if (cmd_changed()) {
     analogWrite(PWM_M, 0);
-    delay(100);
+    delay(30);
     digitalWrite(UP_M, 0);
     digitalWrite(DOWN_M, 0);
     started = 1;
+    in_progress=0;
     motion_started = millis();
   }
   //check it, if not moving

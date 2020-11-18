@@ -97,7 +97,7 @@ bol=1
 while True:
     try:
         instr2.write_register(1,3,0)
-        sleep(7)
+        sleep(20)
         print(instr2.read_register(3,0))
         sleep(0.3)
         instr2.write_register(1,2,0)
