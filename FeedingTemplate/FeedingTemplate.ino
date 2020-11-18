@@ -1,7 +1,7 @@
 #include <Ethernet.h>
 
 #include <SimpleModbusSlave.h>
-#define MODBUS_ID 2
+
 
 #define LED 13
 #define PWM_M 5
@@ -9,9 +9,14 @@
 #define DOWN_M A2
 #define END_SWITCH 4
 #define CURRENT A0
-
+//CONFIGURABLE
+#define MODBUS_ID 2
+#define MAX_UP_TIME 15000
+#define MAX_DOWN_TIME 8000
 boolean endSwitchStopValue = false;
-volatile boolean started = 0;
+int time_for_motion_down = MAX_DOWN_TIME;
+int time_for_motion_up = MAX_UP_TIME;
+//END OF CONFIGURABLE
 
 enum
 {
@@ -29,8 +34,13 @@ enum
   // i.e. the same address space
 };
 
-unsigned int holdingRegs[HOLDING_REGS_SIZE]; // function 3 and 16 register array
+unsigned long motion_started = 0;
 int rotation_cmd = 0;
+unsigned int holdingRegs[HOLDING_REGS_SIZE]; // function 3 and 16 register array
+volatile boolean end_found;
+volatile boolean started = 0;
+
+
 void setup()
 {
   //объявить пин для датчика холла
@@ -45,13 +55,10 @@ void setup()
   pinMode(LED, OUTPUT);
   modbus_configure(&Serial, 4800, SERIAL_8N2, MODBUS_ID, 7, HOLDING_REGS_SIZE, holdingRegs);
   modbus_update_comms(4800, SERIAL_8N2, MODBUS_ID);
-  //проверить наличие геркона, если нет, то поискать и сообщить, что его нет в ENABLED =0
-  //0x1
-  //
   attachInterrupt(1, myEventListener, FALLING);
 
 }
-volatile boolean end_found;
+
 void myEventListener() {
 
   delayMicroseconds(300);
@@ -80,9 +87,7 @@ void calibration() {
   }
 
 }
-unsigned long motion_started = 0;
-int time_for_motion_down = 3000;
-int time_for_motion_up = 40000;
+
 boolean checkTime(unsigned long started, int timer) {
   boolean ok = false;
   if (millis() - started < timer) {
@@ -90,6 +95,7 @@ boolean checkTime(unsigned long started, int timer) {
   }
   return ok;
 }
+
 boolean checkHall() {
   //добавить повторную проверку
   //return digitalRead(END_SWITCH);
@@ -99,6 +105,7 @@ boolean checkHall() {
   }
   return can_move;
 }
+
 boolean motion_allowed(int dir) { //3 - down, 2 - up
   boolean allowed = false;
 
@@ -124,6 +131,7 @@ boolean motion_allowed(int dir) { //3 - down, 2 - up
   //allowed = true;
   return allowed;
 }
+
 boolean cmd_changed() {
   boolean changed = false;
   if ((holdingRegs[ROTATION] != 0) && (holdingRegs[ROTATION] != holdingRegs[LAST_COMMAND])) {
@@ -142,6 +150,7 @@ boolean cmd_changed() {
   }
   return changed;
 }
+
 void move_it(int _rotation_cmd) {
   switch (_rotation_cmd) {
     case 1:
