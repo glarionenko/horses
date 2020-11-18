@@ -2,15 +2,17 @@
 
 #include <SimpleModbusSlave.h>
 
-
+//30мс пропуск между мосфетом и реле
 #define LED 13
 #define PWM_M 5
 #define UP_M A3
 #define DOWN_M A2
 #define END_SWITCH 4
 #define CURRENT A0
+
 //CONFIGURABLE
 #define MODBUS_ID 2
+
 #define MAX_UP_TIME 15000
 #define MAX_DOWN_TIME 8000
 boolean endSwitchStopValue = false;
@@ -150,28 +152,46 @@ boolean cmd_changed() {
   }
   return changed;
 }
-
+int max_sp = 250;
+int min_sp = 30;
+int now_sp;
+int stop_in = 2000;
+int step_time = stop_in / (max_sp - min_sp); // время через которое скорость упадет на 1
+int start_stopping_at = 3000;
+unsigned long last_update;
+boolean in_progress = 0;
 void move_it(int _rotation_cmd) {
   switch (_rotation_cmd) {
     case 1:
       stop_moving();
-      //now_sp = 100;
+      now_sp = min_sp;
       break;
     case 2:
-      //      if ((now_sp < 250) && (millis() - last_update > timer1)) {
-      //        now_sp++;
-      //        last_update = millis();
-      //      }
 
+
+      if (millis() - motion_started > start_stopping_at) {
+
+        if ((now_sp > min_sp) && (now_sp < max_sp) && (millis() - last_update > step_time)) {
+          now_sp--;
+          last_update = millis();
+        }
+
+
+      } else {
+        now_sp = max_sp;
+      }
 
       if (motion_allowed(_rotation_cmd)) {
-
-        digitalWrite(UP_M, 1);
-        digitalWrite(13, 1);
-        delay(500);
-        analogWrite(PWM_M, 150);//now_sp
+        if (!in_progress) {
+          digitalWrite(UP_M, 1);
+          digitalWrite(13, 1);
+          delay(30);
+          in_progress = 1;
+        }
+        analogWrite(PWM_M, now_sp);//now_sp
+        
       } else {
-
+in_progress = 0;
       }
       break;
     case 3:
@@ -183,7 +203,7 @@ void move_it(int _rotation_cmd) {
       if (motion_allowed(_rotation_cmd)) {
         digitalWrite(DOWN_M, 1);
         digitalWrite(13, 1);
-        delay(500);
+        delay(30);
         analogWrite(PWM_M, 250);
       }
       break;
@@ -202,6 +222,7 @@ void stop_moving() {
   digitalWrite(DOWN_M, 0);
   digitalWrite(13, 0);
   delay(100);
+  in_progress = 0;
 }
 void loop()
 {
