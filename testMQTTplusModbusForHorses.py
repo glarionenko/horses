@@ -96,14 +96,14 @@ bol=1
         # error handling """
 while True:
     try:
-        instr1.write_register(1,3,0)
+        instr2.write_register(1,3,0)
         sleep(7)
-        print(instr1.read_register(3,0))
+        print(instr2.read_register(3,0))
         sleep(0.3)
-        instr1.write_register(1,2,0)
-        sleep(7)
+        instr2.write_register(1,2,0)
+        sleep(20)
         print("iteration")
-        print(instr1.read_register(3,0))
+        print(instr2.read_register(3,0))
         sleep(0.3)
     except KeyboardInterrupt:
         sys.exit()

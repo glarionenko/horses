@@ -1,16 +1,18 @@
 #include <Ethernet.h>
 
 #include <SimpleModbusSlave.h>
-#define MODBUS_ID 1
+#define MODBUS_ID 2
 
 #define LED 13
 #define PWM_M 5
 #define UP_M A3
 #define DOWN_M A2
-#define END_SWITCH 3
+#define END_SWITCH 4
+#define CURRENT A0
 
 boolean endSwitchStopValue = false;
-boolean started = 0;
+volatile boolean started = 0;
+
 enum
 {
   // just add or remove registers and your good to go...
@@ -33,6 +35,7 @@ void setup()
 {
   //объявить пин для датчика холла
   pinMode(END_SWITCH, INPUT_PULLUP);
+  // pinMode(4, INPUT_PULLUP);
   pinMode(PWM_M, OUTPUT);
   pinMode(UP_M, OUTPUT);
   pinMode(DOWN_M, OUTPUT);
@@ -43,12 +46,51 @@ void setup()
   modbus_configure(&Serial, 4800, SERIAL_8N2, MODBUS_ID, 7, HOLDING_REGS_SIZE, holdingRegs);
   modbus_update_comms(4800, SERIAL_8N2, MODBUS_ID);
   //проверить наличие геркона, если нет, то поискать и сообщить, что его нет в ENABLED =0
-  holdingRegs[ENABLING] = 1; //0x1
+   //0x1
   //
+  attachInterrupt(1, myEventListener, FALLING);
 }
+void myEventListener() {
+//if(digitalRead(4)==endSwitchStopValue) { //при нажатии кнопки
+////Если от предыдущего нажатия прошло больше 100 миллисекунд
+//if (millis() - previousMillis >= 100) {
+////Запоминается время первого срабатывания
+//previousMillis = millis();
+//
+//if (led==oldled) { //происходит проверка того, что состояние кнопки не изменилось
+//led=!led;
+//}
+  //
+  if(!digitalRead(3)){
+digitalWrite(PWM_M, 0);
+started = 0;
+  }
+}
+void calibration(){
+  int calibration_time=10000; // максимальное время подъема
+  boolean end_found=0;
+  unsigned long check_started=millis();
+  digitalWrite(UP_M,140);
+  delay(300);
+  while((end_found==0)&&(millis()-check_started<calibration_time)){
+   
+    if(digitalRead(END_SWITCH)==endSwitchStopValue){
+      digitalWrite(UP_M,0);
+      end_found=1;
+      }else{
+         digitalWrite(UP_M,1);
+        }
+  }
+  if(end_found){
+    holdingRegs[LAST_COMMAND]= 2;
+    holdingRegs[ENABLING] = 1;
+    }else{
+      holdingRegs[ENABLING] = 0;
+      }
+  }
 unsigned long motion_started = 0;
 int time_for_motion_down = 3000;
-int time_for_motion_up = 3000;
+int time_for_motion_up = 40000;
 boolean checkTime(unsigned long started, int timer) {
   boolean ok = false;
   if (millis() - started < timer) {
@@ -95,6 +137,13 @@ boolean cmd_changed() {
   if ((holdingRegs[ROTATION] != 0) && (holdingRegs[ROTATION] != holdingRegs[LAST_COMMAND])) {
     changed = true;
     holdingRegs[LAST_COMMAND] = holdingRegs[ROTATION];
+    if( holdingRegs[LAST_COMMAND]==2){
+      attachInterrupt(1, myEventListener, FALLING);
+      delay(5);
+      }else if(){
+        detachInterrupt(digitalPinToInterrupt(3));
+        delay(5);
+        }
 
   }
   return changed;
@@ -102,7 +151,7 @@ boolean cmd_changed() {
 void move_it(int _rotation_cmd) {
   switch (_rotation_cmd) {
     case 1:
-
+stop_moving();
       //now_sp = 100;
       break;
     case 2:
@@ -110,12 +159,14 @@ void move_it(int _rotation_cmd) {
       //        now_sp++;
       //        last_update = millis();
       //      }
+      
+      
       if (motion_allowed(_rotation_cmd)) {
 
         digitalWrite(UP_M, 1);
         digitalWrite(13, 1);
         delay(500);
-        analogWrite(PWM_M, 250);//now_sp
+        analogWrite(PWM_M, 150);//now_sp
       } else {
 
       }
@@ -125,8 +176,8 @@ void move_it(int _rotation_cmd) {
       //        now_sp++;
       //        last_update = millis();
       //      }
+      
       if (motion_allowed(_rotation_cmd)) {
-
         digitalWrite(DOWN_M, 1);
         digitalWrite(13, 1);
         delay(500);
