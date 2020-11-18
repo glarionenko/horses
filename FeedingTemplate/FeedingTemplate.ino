@@ -201,9 +201,12 @@ in_progress = 0;
       //      }
 
       if (motion_allowed(_rotation_cmd)) {
+        if(!in_progress){
         digitalWrite(DOWN_M, 1);
         digitalWrite(13, 1);
         delay(30);
+        in_progress = 1;
+        }
         analogWrite(PWM_M, 250);
       }
       break;
