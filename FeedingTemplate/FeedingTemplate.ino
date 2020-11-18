@@ -17,8 +17,8 @@ enum
 {
   // just add or remove registers and your good to go...
   // The first register starts at address 0
-  ENABLING,// OUT is avaliable
-  ROTATION,// IN direction, 2 - up, 3 - down, 1 - stop
+  ENABLING,// OUT is avaliable 0 -not calibrated, 1 good - 2 not good
+  ROTATION,// IN direction, 2 - up, 3 - down, 1 - stop, 4 - calibration
   STATE_NOW,//1 - stopped; 4 - moving, 2 - up, 3 - down
   LAST_COMMAND, //last change
   DOWN_TIME,
@@ -46,40 +46,40 @@ void setup()
   modbus_configure(&Serial, 4800, SERIAL_8N2, MODBUS_ID, 7, HOLDING_REGS_SIZE, holdingRegs);
   modbus_update_comms(4800, SERIAL_8N2, MODBUS_ID);
   //проверить наличие геркона, если нет, то поискать и сообщить, что его нет в ENABLED =0
-   //0x1
+  //0x1
   //
   attachInterrupt(1, myEventListener, FALLING);
-  //WRONG calibration();
+
 }
 volatile boolean end_found;
 void myEventListener() {
 
   delayMicroseconds(300);
-  if(!digitalRead(3)){
-digitalWrite(PWM_M, 0);
-started = 0;
-end_found=1;
+  if (!digitalRead(3)) {
+    digitalWrite(PWM_M, 0);
+    started = 0;
+    end_found = 1;
   }
 }
 
-void calibration(){
-  int calibration_time=10000; // максимальное время подъема
-  end_found=0;
-  unsigned long check_started=millis();
-  digitalWrite(UP_M,1);
+void calibration() {
+  int calibration_time = 10000; // максимальное время подъема
+  end_found = 0;
+  unsigned long check_started = millis();
+  digitalWrite(UP_M, 1);
   delay(300);
-  while((end_found==0)&&(millis()-check_started<calibration_time)){
-         analogWrite(PWM_M,150);
+  while ((end_found == 0) && (millis() - check_started < calibration_time)) {
+    analogWrite(PWM_M, 150);
   }
   stop_moving();
-  if(end_found){
-    holdingRegs[LAST_COMMAND]= 2;
+  if (end_found) {
+    holdingRegs[LAST_COMMAND] = 2;
     holdingRegs[ENABLING] = 1;
-    }else{
-      holdingRegs[ENABLING] = 0;
-      }
-      
+  } else {
+    holdingRegs[ENABLING] = 2;
   }
+
+}
 unsigned long motion_started = 0;
 int time_for_motion_down = 3000;
 int time_for_motion_up = 40000;
@@ -93,10 +93,10 @@ boolean checkTime(unsigned long started, int timer) {
 boolean checkHall() {
   //добавить повторную проверку
   //return digitalRead(END_SWITCH);
-  boolean can_move=0;
-  if(digitalRead(END_SWITCH)!=endSwitchStopValue){
-    can_move=1;
-    }
+  boolean can_move = 0;
+  if (digitalRead(END_SWITCH) != endSwitchStopValue) {
+    can_move = 1;
+  }
   return can_move;
 }
 boolean motion_allowed(int dir) { //3 - down, 2 - up
@@ -130,14 +130,14 @@ boolean cmd_changed() {
     changed = true;
     holdingRegs[LAST_COMMAND] = holdingRegs[ROTATION];
     //переключение прерываний
-    
-    if( holdingRegs[LAST_COMMAND]==2){
+
+    if ( holdingRegs[LAST_COMMAND] == 2) {
       attachInterrupt(1, myEventListener, FALLING);
       delay(5);
-      }else if(holdingRegs[LAST_COMMAND]==3){
-        detachInterrupt(digitalPinToInterrupt(3));
-        delay(5);
-        }
+    } else if (holdingRegs[LAST_COMMAND] == 3) {
+      detachInterrupt(digitalPinToInterrupt(3));
+      delay(5);
+    }
 
   }
   return changed;
@@ -145,7 +145,7 @@ boolean cmd_changed() {
 void move_it(int _rotation_cmd) {
   switch (_rotation_cmd) {
     case 1:
-stop_moving();
+      stop_moving();
       //now_sp = 100;
       break;
     case 2:
@@ -153,8 +153,8 @@ stop_moving();
       //        now_sp++;
       //        last_update = millis();
       //      }
-      
-      
+
+
       if (motion_allowed(_rotation_cmd)) {
 
         digitalWrite(UP_M, 1);
@@ -170,13 +170,16 @@ stop_moving();
       //        now_sp++;
       //        last_update = millis();
       //      }
-      
+
       if (motion_allowed(_rotation_cmd)) {
         digitalWrite(DOWN_M, 1);
         digitalWrite(13, 1);
         delay(500);
         analogWrite(PWM_M, 250);
       }
+      break;
+    case 4:
+      calibration();
       break;
 
   }
