@@ -10,7 +10,7 @@
 #define END_SWITCH 4
 #define CURRENT A0
 
-boolean endSwitchStopValue = true;
+boolean endSwitchStopValue = false;
 volatile boolean started = 0;
 
 enum
@@ -48,7 +48,7 @@ void setup()
   //проверить наличие геркона, если нет, то поискать и сообщить, что его нет в ENABLED =0
    //0x1
   //
-  //attachInterrupt(1, myEventListener, FALLING);
+  attachInterrupt(1, myEventListener, FALLING);
 }
 void myEventListener() {
 //if(digitalRead(4)==endSwitchStopValue) { //при нажатии кнопки
@@ -61,6 +61,7 @@ void myEventListener() {
 //led=!led;
 //}
   //
+  delayMicroseconds(300);
   if(!digitalRead(3)){
 digitalWrite(PWM_M, 0);
 started = 0;
@@ -138,15 +139,15 @@ boolean cmd_changed() {
     changed = true;
     holdingRegs[LAST_COMMAND] = holdingRegs[ROTATION];
     //переключение прерываний
-    /*
+    
     if( holdingRegs[LAST_COMMAND]==2){
       attachInterrupt(1, myEventListener, FALLING);
       delay(5);
-      }else if(){
+      }else if(holdingRegs[LAST_COMMAND]==3){
         detachInterrupt(digitalPinToInterrupt(3));
         delay(5);
         }
-*/
+
   }
   return changed;
 }
