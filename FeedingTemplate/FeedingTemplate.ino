@@ -49,45 +49,36 @@ void setup()
    //0x1
   //
   attachInterrupt(1, myEventListener, FALLING);
+  //WRONG calibration();
 }
+volatile boolean end_found;
 void myEventListener() {
-//if(digitalRead(4)==endSwitchStopValue) { //при нажатии кнопки
-////Если от предыдущего нажатия прошло больше 100 миллисекунд
-//if (millis() - previousMillis >= 100) {
-////Запоминается время первого срабатывания
-//previousMillis = millis();
-//
-//if (led==oldled) { //происходит проверка того, что состояние кнопки не изменилось
-//led=!led;
-//}
-  //
+
   delayMicroseconds(300);
   if(!digitalRead(3)){
 digitalWrite(PWM_M, 0);
 started = 0;
+end_found=1;
   }
 }
+
 void calibration(){
   int calibration_time=10000; // максимальное время подъема
-  boolean end_found=0;
+  end_found=0;
   unsigned long check_started=millis();
-  digitalWrite(UP_M,140);
+  digitalWrite(UP_M,1);
   delay(300);
   while((end_found==0)&&(millis()-check_started<calibration_time)){
-   
-    if(digitalRead(END_SWITCH)==endSwitchStopValue){
-      digitalWrite(UP_M,0);
-      end_found=1;
-      }else{
-         digitalWrite(UP_M,1);
-        }
+         analogWrite(PWM_M,150);
   }
+  stop_moving();
   if(end_found){
     holdingRegs[LAST_COMMAND]= 2;
     holdingRegs[ENABLING] = 1;
     }else{
       holdingRegs[ENABLING] = 0;
       }
+      
   }
 unsigned long motion_started = 0;
 int time_for_motion_down = 3000;
