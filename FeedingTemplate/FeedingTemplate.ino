@@ -1,5 +1,3 @@
-#include <Ethernet.h>
-
 #include <SimpleModbusSlave.h>
 
 //30мс пропуск между мосфетом и реле

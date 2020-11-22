@@ -5,7 +5,7 @@ from time import *
 
 #mqtt auth
 #broker="188.242.123.156"
-broker="192.168.0.116"
+broker="192.168.50.127"
 port=9001
 
 #modbus start
