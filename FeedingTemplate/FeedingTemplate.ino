@@ -9,7 +9,7 @@
 #define CURRENT A0
 
 //CONFIGURABLE
-#define MODBUS_ID 2
+#define MODBUS_ID 1
 
 #define MAX_UP_TIME 15000
 #define MAX_DOWN_TIME 8000
@@ -45,7 +45,7 @@ void setup()
 {
   //объявить пин для датчика холла
   pinMode(END_SWITCH, INPUT_PULLUP);
-  // pinMode(4, INPUT_PULLUP);
+  pinMode(4, INPUT_PULLUP);
   pinMode(PWM_M, OUTPUT);
   pinMode(UP_M, OUTPUT);
   pinMode(DOWN_M, OUTPUT);
@@ -55,14 +55,14 @@ void setup()
   pinMode(LED, OUTPUT);
   modbus_configure(&Serial, 4800, SERIAL_8N2, MODBUS_ID, 7, HOLDING_REGS_SIZE, holdingRegs);
   modbus_update_comms(4800, SERIAL_8N2, MODBUS_ID);
-  attachInterrupt(1, myEventListener, FALLING);
+  attachInterrupt(1, myEventListener, RISING);
 
 }
 
 void myEventListener() {
 
   delayMicroseconds(300);
-  if (!digitalRead(3)) {
+  if (digitalRead(3)) {
     digitalWrite(PWM_M, 0);
     started = 0;
     end_found = 1;
