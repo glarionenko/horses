@@ -25,7 +25,7 @@ instr1.serial.stopbits = 2
 instr1.debug=False
 sleep(2)
 print(instr1)
-#
+""" #
 instr2 = minimalmodbus.Instrument('COM9', 3)
 instr2.serial.baudrate=4800
 instr2.serial.timeout=5
@@ -54,7 +54,7 @@ instr4.serial.bytesize = 8
 instr4.serial.stopbits = 2
 instr4.debug=False
 sleep(2)
-print(instr4)
+print(instr4) """
 #
 # instr5 = minimalmodbus.Instrument('COM9', 2)
 # instr5.serial.baudrate=4800
@@ -94,8 +94,8 @@ client1.username_pw_set("horse","55566678")
 client1.on_publish = on_publish                          #assign function to callback
 client1.on_message=on_message
 client1.on_connect=on_connect
-client1.connect(broker,port)
-client1.loop_start()
+#client1.connect(broker,port)
+#client1.loop_start()
 
 
 bol=1
@@ -129,9 +129,10 @@ def up_me(instr,dir):
             break
     
 
-
-up_me(instr1,3)
-sleep(2)
-up_me(instr1,3)
+while True:
+    up_me(instr1,3)
+    sleep(20)
+    up_me(instr1,2)
+    sleep(20)
 
         

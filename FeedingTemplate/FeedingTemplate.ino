@@ -225,9 +225,14 @@ void stop_moving() {
   delay(100);
   in_progress = 0;
 }
+unsigned long last_b;
 void loop()
 {
   modbus_update();
+  if(millis()-last_b>500){
+  digitalWrite(13,!digitalRead(13));
+  last_b=millis();
+  }
   if (cmd_changed()) {
     analogWrite(PWM_M, 0);
     delay(30);
