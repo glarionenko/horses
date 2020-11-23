@@ -86,6 +86,28 @@ def on_message(client, userdata, message):
     print("message topic=",message.topic)
     print("message qos=",message.qos)
     print("message retain flag=",message.retain)
+    #3 down 2 - up 1 stop
+    if(message.topic=="food/1"):
+        move_me(instr1,int(str(message.payload.decode("utf-8"))))
+    if(message.topic=="food/2"):
+        move_me(instr2,int(str(message.payload.decode("utf-8"))))
+    if(message.topic=="food/3"):
+        move_me(instr3,int(str(message.payload.decode("utf-8"))))
+    if(message.topic=="food/4"):
+        move_me(instr4,int(str(message.payload.decode("utf-8"))))
+    if(message.topic=="food/5"):
+        move_me(instr5,int(str(message.payload.decode("utf-8"))))
+    if(message.topic=="food/reset"):
+        move_me(instr1,int(str(message.payload.decode("utf-8"))))
+        sleep(20)
+        move_me(instr2,int(str(message.payload.decode("utf-8"))))
+        sleep(20)
+        move_me(instr3,int(str(message.payload.decode("utf-8"))))
+        sleep(20)
+        move_me(instr4,int(str(message.payload.decode("utf-8"))))
+        sleep(20)
+        move_me(instr5,int(str(message.payload.decode("utf-8"))))
+        sleep(20)
     #client.publish(id_to_topic_states[topic_to_id[message.topic]],str(changed[topic_to_id[message.topic]]))
     
 client1= paho.Client("Horse1234",transport="websockets")                           #create client object
@@ -109,7 +131,7 @@ while True:
         pass
 print(x)
 
-def up_me(instr,dir):
+def move_me(instr,dir):
     started=time()
     done = 0
     while (time()-started<10.0) and (done<1):
@@ -127,27 +149,5 @@ def up_me(instr,dir):
             #continue
         if(done==1):
             break
-    
-
-while True:
-    up_me(instr4,3)
-    sleep(20)
-    up_me(instr4,2)
-    sleep(20)
-    #
-    up_me(instr3,3)
-    sleep(20)
-    up_me(instr3,2)
-    sleep(20)
-    #
-    up_me(instr2,3)
-    sleep(20)
-    up_me(instr2,2)
-    sleep(20)
-    #
-    up_me(instr1,3)
-    sleep(20)
-    up_me(instr1,2)
-    sleep(20)
 
         
