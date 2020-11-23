@@ -76,9 +76,9 @@ void calibration() {
   //move down for 2 sec
   digitalWrite(DOWN_M, 1);
   delay(30);
-  analogWrite(PWM_M,150);
+  analogWrite(PWM_M, 150);
   delay(2000);
-  analogWrite(PWM_M,0);
+  analogWrite(PWM_M, 0);
   delay(30);
   digitalWrite(DOWN_M, 0);
   delay(30);
@@ -91,6 +91,7 @@ void calibration() {
   if (end_found) {
     holdingRegs[LAST_COMMAND] = 2;
     holdingRegs[ENABLING] = 1;
+     holdingRegs[STATE_NOW]=2;
   } else {
     holdingRegs[ENABLING] = 2;
   }
@@ -194,11 +195,12 @@ void move_it(int _rotation_cmd) {
           digitalWrite(13, 1);
           delay(30);
           in_progress = 1;
+          holdingRegs[STATE_NOW] = 4;
         }
         analogWrite(PWM_M, now_sp);//now_sp
-        
+
       } else {
-in_progress = 0;
+        in_progress = 0;
       }
       break;
     case 3:
@@ -208,13 +210,15 @@ in_progress = 0;
       //      }
 
       if (motion_allowed(_rotation_cmd)) {
-        if(!in_progress){
-        digitalWrite(DOWN_M, 1);
-        digitalWrite(13, 1);
-        delay(30);
-        in_progress = 1;
+        if (!in_progress) {
+          digitalWrite(DOWN_M, 1);
+          digitalWrite(13, 1);
+          delay(30);
+          in_progress = 1;
+          holdingRegs[STATE_NOW] = 4;
         }
         analogWrite(PWM_M, 250);
+
       }
       break;
     case 4:
@@ -233,15 +237,17 @@ void stop_moving() {
   digitalWrite(13, 0);
   delay(100);
   in_progress = 0;
+  holdingRegs[STATE_NOW] = holdingRegs[LAST_COMMAND];
+
 }
 unsigned long last_b;
 void loop()
 {
   modbus_update();
   /*if(millis()-last_b>500){
-  digitalWrite(13,!digitalRead(13));
-  last_b=millis();
-  }
+    digitalWrite(13,!digitalRead(13));
+    last_b=millis();
+    }
   */
   if (cmd_changed()) {
     analogWrite(PWM_M, 0);
@@ -249,7 +255,7 @@ void loop()
     digitalWrite(UP_M, 0);
     digitalWrite(DOWN_M, 0);
     started = 1;
-    in_progress=0;
+    in_progress = 0;
     motion_started = millis();
   }
   //check it, if not moving
