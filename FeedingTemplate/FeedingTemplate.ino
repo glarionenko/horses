@@ -73,8 +73,17 @@ void calibration() {
   int calibration_time = 10000; // максимальное время подъема
   end_found = 0;
   unsigned long check_started = millis();
+  //move down for 2 sec
+  digitalWrite(DOWN_M, 1);
+  delay(30);
+  analogWrite(PWM_M,150);
+  delay(2000);
+  analogWrite(PWM_M,0);
+  delay(30);
+  digitalWrite(DOWN_M, 0);
+  delay(30);
   digitalWrite(UP_M, 1);
-  delay(300);
+  delay(30);
   while ((end_found == 0) && (millis() - check_started < calibration_time)) {
     analogWrite(PWM_M, 150);
   }
