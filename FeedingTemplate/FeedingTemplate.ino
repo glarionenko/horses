@@ -140,7 +140,7 @@ boolean cmd_changed() {
     //переключение прерываний
 
     if ( holdingRegs[LAST_COMMAND] == 2) {
-      attachInterrupt(1, myEventListener, FALLING);
+      attachInterrupt(1, myEventListener, RISING);
       delay(5);
     } else if (holdingRegs[LAST_COMMAND] == 3) {
       detachInterrupt(digitalPinToInterrupt(3));
@@ -218,7 +218,7 @@ in_progress = 0;
 void stop_moving() {
 
   analogWrite(PWM_M, 0);
-  delay(100);
+  delay(30);
   digitalWrite(UP_M, 0);
   digitalWrite(DOWN_M, 0);
   digitalWrite(13, 0);
@@ -229,10 +229,11 @@ unsigned long last_b;
 void loop()
 {
   modbus_update();
-  if(millis()-last_b>500){
+  /*if(millis()-last_b>500){
   digitalWrite(13,!digitalRead(13));
   last_b=millis();
   }
+  */
   if (cmd_changed()) {
     analogWrite(PWM_M, 0);
     delay(30);
