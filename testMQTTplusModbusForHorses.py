@@ -4,6 +4,10 @@ import minimalmodbus
 from time import *
 import sys
 
+#add find arduino port here
+#buy and prepeare bolid firmware to work with raspberry
+
+
 #mqtt auth
 #broker="188.242.123.156"
 broker="192.168.50.127"
@@ -11,6 +15,7 @@ port=9001
 
 #modbus start
 #modbus start
+
 instr1 = minimalmodbus.Instrument('COM9', 4)
 instr1.serial.baudrate=4800
 instr1.serial.timeout=5
@@ -41,7 +46,7 @@ instr3.debug=False
 sleep(2)
 print(instr3)
 #
-instr4 = minimalmodbus.Instrument('COM9', 13)
+instr4 = minimalmodbus.Instrument('COM9', 1)
 instr4.serial.baudrate=4800
 instr4.serial.timeout=5
 instr4.serial.parity = minimalmodbus.serial.PARITY_NONE
@@ -65,8 +70,13 @@ sleep(2)
 #
 def on_connect(mqttc, obj, flags, rc):
     print("rc: "+str(rc))
-    client1.subscribe("testtopic/1")
-    client1.publish("house/bulb1","off")
+    client1.subscribe("food/1")
+    client1.subscribe("food/2")
+    client1.subscribe("food/3")
+    client1.subscribe("food/4")
+    client1.subscribe("food/5")
+    client1.subscribe("food/reset")
+    client1.publish("test/check","off")
 def on_publish(client,userdata,result):             #create function for callback
     print("data published \n")
     pass
@@ -89,59 +99,39 @@ client1.loop_start()
 
 
 bol=1
-""" while True:
-    try:
-        # try code
-        break # quit the loop if successful
-    except:
-        # error handling """
+x=0
 while True:
     try:
-        #
-        instr1.write_register(1,2,0)
-        sleep(6)
-        print(instr1.read_register(3,0))
-        sleep(0.3)
-        instr1.write_register(1,2,0)
-        sleep(20)
-        print("iteration1")
-        print(instr1.read_register(3,0))
-        sleep(13)
-        #
-        instr2.write_register(1,3,0)
-        sleep(6)
-        print(instr2.read_register(3,0))
-        sleep(0.3)
-        instr2.write_register(1,2,0)
-        sleep(20)
-        print("iteration2")
-        print(instr2.read_register(3,0))
-        sleep(13)
-        #
-        instr3.write_register(1,3,0)
-        sleep(6)
-        print(instr3.read_register(3,0))
-        sleep(0.3)
-        instr3.write_register(1,2,0)
-        sleep(20)
-        print("iteration3")
-        print(instr4.read_register(3,0))
-        sleep(13)
-        #
-        instr4.write_register(1,3,0)
-        sleep(6)
-        print(instr4.read_register(3,0))
-        sleep(0.3)
-        instr4.write_register(1,2,0)
-        sleep(20)
-        print("iteration4")
-        print(instr4.read_register(3,0))
-        sleep(13)
-    except KeyboardInterrupt:
-        sys.exit()
-    except Exception as e:
-        print(e)
-        continue
+        x=x+1
+        break # quit the loop if successful
+    except:
+        # error 
         pass
+print(x)
+
+def up_me(instr,dir):
+    started=time()
+    done = 0
+    while (time()-started<10.0) and (done<1):
+        try:
+            instr.write_register(1,dir,0)
+            done = 1
+            break
+        except KeyboardInterrupt:
+            sys.exit()
+        except Exception as e:
+            print(dir)
+            print(done)
+            print("error")
+            print(e)
+            #continue
+        if(done==1):
+            break
+    
+
+
+up_me(instr1,3)
+sleep(2)
+up_me(instr1,3)
 
         
