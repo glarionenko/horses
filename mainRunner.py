@@ -9,7 +9,7 @@ err=1
 while err==1:
 #if(1==1):
     try:
-        exec(open('/home/pi/Desktop/MODBUS_play_TWO_videos_by_gpio.py').read())
+        exec(open('/home/pi/Desktop/horses/horses/testMQTTplusModbusForHorses.py').read())
         print("Runned")
         err=0;
     except:
