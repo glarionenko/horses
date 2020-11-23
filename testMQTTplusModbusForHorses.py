@@ -6,7 +6,6 @@ import sys
 import serial
 import serial.tools.list_ports
 
-
 ports = serial.tools.list_ports.comports() #automatic searching of ports
 portArd = '1411' #change it for your arduino
 
@@ -21,7 +20,6 @@ for port1, desc, hwid in sorted(ports):
 #add find arduino port here
 #buy and prepeare bolid firmware to work with raspberry
 
-
 #mqtt auth
 #broker="188.242.123.156"
 broker="192.168.50.127"
@@ -30,7 +28,7 @@ port=9001
 #modbus start
 #modbus start
 
-instr1 = minimalmodbus.Instrument(arduino_port, 4)
+instr1 = minimalmodbus.Instrument(arduino_port, 1)
 instr1.serial.baudrate=4800
 instr1.serial.timeout=5
 instr1.serial.parity = minimalmodbus.serial.PARITY_NONE
@@ -40,7 +38,7 @@ instr1.debug=False
 sleep(2)
 print(instr1)
 #
-instr2 = minimalmodbus.Instrument(arduino_port, 3)
+instr2 = minimalmodbus.Instrument(arduino_port, 2)
 instr2.serial.baudrate=4800
 instr2.serial.timeout=5
 instr2.serial.parity = minimalmodbus.serial.PARITY_NONE
@@ -50,7 +48,7 @@ instr2.debug=False
 sleep(2)
 print(instr2)
 #
-instr3 = minimalmodbus.Instrument(arduino_port, 2)
+instr3 = minimalmodbus.Instrument(arduino_port, 3)
 instr3.serial.baudrate=4800
 instr3.serial.timeout=5
 instr3.serial.parity = minimalmodbus.serial.PARITY_NONE
@@ -60,7 +58,7 @@ instr3.debug=False
 sleep(2)
 print(instr3)
 #
-instr4 = minimalmodbus.Instrument(arduino_port, 1)
+instr4 = minimalmodbus.Instrument(arduino_port, 4)
 instr4.serial.baudrate=4800
 instr4.serial.timeout=5
 instr4.serial.parity = minimalmodbus.serial.PARITY_NONE
@@ -103,6 +101,7 @@ def on_message(client, userdata, message):
     #3 down 2 - up 1 stop
     if(message.topic=="food/1"):
         move_me(instr1,int(str(message.payload.decode("utf-8"))))
+        #upd_me(instr1,"food/return/1")
     if(message.topic=="food/2"):
         move_me(instr2,int(str(message.payload.decode("utf-8"))))
     if(message.topic=="food/3"):
@@ -110,6 +109,7 @@ def on_message(client, userdata, message):
     if(message.topic=="food/4"):
         move_me(instr4,int(str(message.payload.decode("utf-8"))))
     if(message.topic=="food/5"):
+        pass
         #move_me(instr5,int(str(message.payload.decode("utf-8"))))
     if(message.topic=="food/reset"):
         move_me(instr1,int(str(message.payload.decode("utf-8"))))
@@ -119,9 +119,9 @@ def on_message(client, userdata, message):
         move_me(instr3,int(str(message.payload.decode("utf-8"))))
         sleep(20)
         move_me(instr4,int(str(message.payload.decode("utf-8"))))
-        #sleep(20)
-        #move_me(instr5,int(str(message.payload.decode("utf-8"))))
         sleep(20)
+        #move_me(instr5,int(str(message.payload.decode("utf-8"))))
+        #sleep(20)
     #client.publish(id_to_topic_states[topic_to_id[message.topic]],str(changed[topic_to_id[message.topic]]))
     
 client1= paho.Client("Horse1234",transport="websockets")                           #create client object
@@ -144,7 +144,23 @@ while True:
         # error 
         pass
 print(x)
-
+""" def upd_me(instr, topic):
+    started=time()
+    done = 0
+    while (time()-started<10.0) and (done<1):
+        try:
+            g=instr.read_register(2,0)
+            client1.publish(topic,str(g))
+            print(g)
+            done = 1
+            break
+        except KeyboardInterrupt:
+            sys.exit()
+        except Exception as e:
+            print(e)
+            #continue
+        if(done==1):
+            break """
 def move_me(instr,dir):
     started=time()
     done = 0
@@ -156,9 +172,6 @@ def move_me(instr,dir):
         except KeyboardInterrupt:
             sys.exit()
         except Exception as e:
-            print(dir)
-            print(done)
-            print("error")
             print(e)
             #continue
         if(done==1):
