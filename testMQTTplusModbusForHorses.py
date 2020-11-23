@@ -3,6 +3,20 @@ import paho.mqtt.client as paho
 import minimalmodbus
 from time import *
 import sys
+import serial
+import serial.tools.list_ports
+
+
+ports = serial.tools.list_ports.comports() #automatic searching of ports
+portArd = '1411' #change it for your arduino
+
+for port1, desc, hwid in sorted(ports):
+    print(hwid)
+    if (hwid.find(portArd) != -1):
+        print ("Arduino found")
+        print (port1)
+        arduino_port = port1
+#arduino_port contains port
 
 #add find arduino port here
 #buy and prepeare bolid firmware to work with raspberry
@@ -16,7 +30,7 @@ port=9001
 #modbus start
 #modbus start
 
-instr1 = minimalmodbus.Instrument('COM9', 4)
+instr1 = minimalmodbus.Instrument(arduino_port, 4)
 instr1.serial.baudrate=4800
 instr1.serial.timeout=5
 instr1.serial.parity = minimalmodbus.serial.PARITY_NONE
@@ -26,7 +40,7 @@ instr1.debug=False
 sleep(2)
 print(instr1)
 #
-instr2 = minimalmodbus.Instrument('COM9', 3)
+instr2 = minimalmodbus.Instrument(arduino_port, 3)
 instr2.serial.baudrate=4800
 instr2.serial.timeout=5
 instr2.serial.parity = minimalmodbus.serial.PARITY_NONE
@@ -36,7 +50,7 @@ instr2.debug=False
 sleep(2)
 print(instr2)
 #
-instr3 = minimalmodbus.Instrument('COM9', 2)
+instr3 = minimalmodbus.Instrument(arduino_port, 2)
 instr3.serial.baudrate=4800
 instr3.serial.timeout=5
 instr3.serial.parity = minimalmodbus.serial.PARITY_NONE
@@ -46,7 +60,7 @@ instr3.debug=False
 sleep(2)
 print(instr3)
 #
-instr4 = minimalmodbus.Instrument('COM9', 1)
+instr4 = minimalmodbus.Instrument(arduino_port, 1)
 instr4.serial.baudrate=4800
 instr4.serial.timeout=5
 instr4.serial.parity = minimalmodbus.serial.PARITY_NONE
@@ -56,7 +70,7 @@ instr4.debug=False
 sleep(2)
 print(instr4)
 #
-# instr5 = minimalmodbus.Instrument('COM9', 2)
+# instr5 = minimalmodbus.Instrument(arduino_port, 2)
 # instr5.serial.baudrate=4800
 # instr5.serial.timeout=5
 # instr5.serial.parity = minimalmodbus.serial.PARITY_NONE
@@ -96,7 +110,7 @@ def on_message(client, userdata, message):
     if(message.topic=="food/4"):
         move_me(instr4,int(str(message.payload.decode("utf-8"))))
     if(message.topic=="food/5"):
-        move_me(instr5,int(str(message.payload.decode("utf-8"))))
+        #move_me(instr5,int(str(message.payload.decode("utf-8"))))
     if(message.topic=="food/reset"):
         move_me(instr1,int(str(message.payload.decode("utf-8"))))
         sleep(20)
@@ -105,8 +119,8 @@ def on_message(client, userdata, message):
         move_me(instr3,int(str(message.payload.decode("utf-8"))))
         sleep(20)
         move_me(instr4,int(str(message.payload.decode("utf-8"))))
-        sleep(20)
-        move_me(instr5,int(str(message.payload.decode("utf-8"))))
+        #sleep(20)
+        #move_me(instr5,int(str(message.payload.decode("utf-8"))))
         sleep(20)
     #client.publish(id_to_topic_states[topic_to_id[message.topic]],str(changed[topic_to_id[message.topic]]))
     
@@ -150,4 +164,5 @@ def move_me(instr,dir):
         if(done==1):
             break
 
-        
+while True:
+    sleep(0.2)     
