@@ -2,6 +2,7 @@
 import paho.mqtt.client as paho
 import minimalmodbus
 from time import *
+import sys
 
 #mqtt auth
 #broker="188.242.123.156"
@@ -10,7 +11,7 @@ port=9001
 
 #modbus start
 #modbus start
-instr1 = minimalmodbus.Instrument('COM9', 1)
+instr1 = minimalmodbus.Instrument('COM9', 4)
 instr1.serial.baudrate=4800
 instr1.serial.timeout=5
 instr1.serial.parity = minimalmodbus.serial.PARITY_NONE
@@ -20,7 +21,7 @@ instr1.debug=False
 sleep(2)
 print(instr1)
 #
-instr2 = minimalmodbus.Instrument('COM9', 2)
+instr2 = minimalmodbus.Instrument('COM9', 3)
 instr2.serial.baudrate=4800
 instr2.serial.timeout=5
 instr2.serial.parity = minimalmodbus.serial.PARITY_NONE
@@ -40,7 +41,7 @@ instr3.debug=False
 sleep(2)
 print(instr3)
 #
-instr4 = minimalmodbus.Instrument('COM9', 2)
+instr4 = minimalmodbus.Instrument('COM9', 13)
 instr4.serial.baudrate=4800
 instr4.serial.timeout=5
 instr4.serial.parity = minimalmodbus.serial.PARITY_NONE
@@ -50,15 +51,15 @@ instr4.debug=False
 sleep(2)
 print(instr4)
 #
-instr5 = minimalmodbus.Instrument('COM9', 2)
-instr5.serial.baudrate=4800
-instr5.serial.timeout=5
-instr5.serial.parity = minimalmodbus.serial.PARITY_NONE
-instr5.serial.bytesize = 8
-instr5.serial.stopbits = 2
-instr5.debug=False
-sleep(2)
-print(instr5)
+# instr5 = minimalmodbus.Instrument('COM9', 2)
+# instr5.serial.baudrate=4800
+# instr5.serial.timeout=5
+# instr5.serial.parity = minimalmodbus.serial.PARITY_NONE
+# instr5.serial.bytesize = 8
+# instr5.serial.stopbits = 2
+# instr5.debug=False
+# sleep(2)
+#print(instr5)
 
 sleep(2)
 #
@@ -96,15 +97,46 @@ bol=1
         # error handling """
 while True:
     try:
-        instr1.write_register(1,3,0)
-        sleep(20)
+        #
+        instr1.write_register(1,2,0)
+        sleep(6)
         print(instr1.read_register(3,0))
         sleep(0.3)
         instr1.write_register(1,2,0)
         sleep(20)
-        print("iteration")
+        print("iteration1")
         print(instr1.read_register(3,0))
+        sleep(13)
+        #
+        instr2.write_register(1,3,0)
+        sleep(6)
+        print(instr2.read_register(3,0))
         sleep(0.3)
+        instr2.write_register(1,2,0)
+        sleep(20)
+        print("iteration2")
+        print(instr2.read_register(3,0))
+        sleep(13)
+        #
+        instr3.write_register(1,3,0)
+        sleep(6)
+        print(instr3.read_register(3,0))
+        sleep(0.3)
+        instr3.write_register(1,2,0)
+        sleep(20)
+        print("iteration3")
+        print(instr4.read_register(3,0))
+        sleep(13)
+        #
+        instr4.write_register(1,3,0)
+        sleep(6)
+        print(instr4.read_register(3,0))
+        sleep(0.3)
+        instr4.write_register(1,2,0)
+        sleep(20)
+        print("iteration4")
+        print(instr4.read_register(3,0))
+        sleep(13)
     except KeyboardInterrupt:
         sys.exit()
     except Exception as e:
