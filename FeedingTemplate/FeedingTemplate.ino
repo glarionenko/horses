@@ -9,7 +9,7 @@
 #define CURRENT A0
 
 //CONFIGURABLE
-#define MODBUS_ID 4
+#define MODBUS_ID 1
 
 #define MAX_UP_TIME 15000
 #define MAX_DOWN_TIME 8000
@@ -72,6 +72,7 @@ void myEventListener() {
 void calibration() {
   int calibration_time = 10000; // максимальное время подъема
   end_found = 0;
+  delay(5000*MODBUS_ID);
   unsigned long check_started = millis();
   digitalWrite(DOWN_M, 1);
   tone(PWM_M, 1000);
