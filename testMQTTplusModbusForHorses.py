@@ -5,7 +5,7 @@ from time import *
 import sys
 import serial
 import serial.tools.list_ports
-
+#
 ports = serial.tools.list_ports.comports() #automatic searching of ports
 portArd = '1411' #change it for your arduino
 
@@ -68,14 +68,14 @@ instr4.debug=False
 sleep(2)
 print(instr4)
 #
- instr5 = minimalmodbus.Instrument(arduino_port, 2)
- instr5.serial.baudrate=4800
- instr5.serial.timeout=5
- instr5.serial.parity = minimalmodbus.serial.PARITY_NONE
- instr5.serial.bytesize = 8
- instr5.serial.stopbits = 2
- instr5.debug=False
- sleep(2)
+instr5 = minimalmodbus.Instrument(arduino_port, 5)
+instr5.serial.baudrate=4800
+instr5.serial.timeout=5
+instr5.serial.parity = minimalmodbus.serial.PARITY_NONE
+instr5.serial.bytesize = 8
+instr5.serial.stopbits = 2
+instr5.debug=False
+sleep(2)
 #print(instr5)
 
 sleep(2)
