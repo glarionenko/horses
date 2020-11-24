@@ -82,7 +82,7 @@ void calibration() {
   tone(PWM_M, 3000);
   delay(300);
   noTone(PWM_M);
-  digitalWrite(DOWN_M, 0);
+  //digitalWrite(DOWN_M, 0);
   //move down for 2 sec
   digitalWrite(DOWN_M, 1);
   delay(30);
