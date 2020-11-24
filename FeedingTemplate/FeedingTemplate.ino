@@ -56,7 +56,7 @@ void setup()
   modbus_configure(&Serial, 4800, SERIAL_8N2, MODBUS_ID, 7, HOLDING_REGS_SIZE, holdingRegs);
   modbus_update_comms(4800, SERIAL_8N2, MODBUS_ID);
   attachInterrupt(1, myEventListener, RISING);
-
+  calibration();
 }
 
 void myEventListener() {
@@ -73,6 +73,15 @@ void calibration() {
   int calibration_time = 10000; // максимальное время подъема
   end_found = 0;
   unsigned long check_started = millis();
+  digitalWrite(DOWN_M, 1);
+  tone(PWM_M, 1000);
+  delay(300);
+  tone(PWM_M, 2000);
+  delay(300);
+  tone(PWM_M, 3000);
+  delay(300);
+  noTone(PWM_M);
+  digitalWrite(DOWN_M, 0);
   //move down for 2 sec
   digitalWrite(DOWN_M, 1);
   delay(30);
@@ -91,7 +100,7 @@ void calibration() {
   if (end_found) {
     holdingRegs[LAST_COMMAND] = 2;
     holdingRegs[ENABLING] = 1;
-     holdingRegs[STATE_NOW]=2;
+    holdingRegs[STATE_NOW] = 2;
   } else {
     holdingRegs[ENABLING] = 2;
   }
