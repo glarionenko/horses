@@ -68,14 +68,14 @@ instr4.debug=False
 sleep(2)
 print(instr4)
 #
-# instr5 = minimalmodbus.Instrument(arduino_port, 2)
-# instr5.serial.baudrate=4800
-# instr5.serial.timeout=5
-# instr5.serial.parity = minimalmodbus.serial.PARITY_NONE
-# instr5.serial.bytesize = 8
-# instr5.serial.stopbits = 2
-# instr5.debug=False
-# sleep(2)
+ instr5 = minimalmodbus.Instrument(arduino_port, 2)
+ instr5.serial.baudrate=4800
+ instr5.serial.timeout=5
+ instr5.serial.parity = minimalmodbus.serial.PARITY_NONE
+ instr5.serial.bytesize = 8
+ instr5.serial.stopbits = 2
+ instr5.debug=False
+ sleep(2)
 #print(instr5)
 
 sleep(2)
@@ -109,8 +109,7 @@ def on_message(client, userdata, message):
     if(message.topic=="food/4"):
         move_me(instr4,int(str(message.payload.decode("utf-8"))))
     if(message.topic=="food/5"):
-        pass
-        #move_me(instr5,int(str(message.payload.decode("utf-8"))))
+        move_me(instr5,int(str(message.payload.decode("utf-8"))))
     if(message.topic=="food/reset"):
         move_me(instr1,int(str(message.payload.decode("utf-8"))))
         sleep(20)
@@ -120,8 +119,8 @@ def on_message(client, userdata, message):
         sleep(20)
         move_me(instr4,int(str(message.payload.decode("utf-8"))))
         sleep(20)
-        #move_me(instr5,int(str(message.payload.decode("utf-8"))))
-        #sleep(20)
+        move_me(instr5,int(str(message.payload.decode("utf-8"))))
+        sleep(20)
     #client.publish(id_to_topic_states[topic_to_id[message.topic]],str(changed[topic_to_id[message.topic]]))
     
 client1= paho.Client("Horse1234",transport="websockets")                           #create client object
