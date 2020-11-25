@@ -177,21 +177,26 @@ def move_me(instr,dir):
 def reset_by_button():
     global instruments
     readed1=read_me(instruments[1],3)
+    sleep(1)
     readed2=read_me(instruments[1],3)
+    sleep(1)
     readed3=read_me(instruments[1],3)
+    sleep(1)
     readed4=read_me(instruments[1],3)
+    sleep(1)
     readed5=read_me(instruments[1],3)
+    sleep(1)
 #   #not correct
     if(((readed1==4)or(readed1==2))\
         and((readed2==4)or(readed2==2))\
         and((readed3==4)or(readed3==2))\
         and((readed4==4)or(readed4==2))\
         and((readed5==4)or(readed5==2)))\
-        or(readed1==3 and readed2==3 and readed3==3 and readed4==3 and readed15==3):
+        or(readed1==3 and readed2==3 and readed3==3 and readed4==3 and readed5==3):
             func=0
-            if((readed==4)or(readed==2)):
+            if((readed1==4)or(readed1==2)):
                 func=3
-            if(readed==3):
+            if(readed1==3):
                 func=2
             move_me(instr1,func)
             sleep(20)
@@ -211,11 +216,11 @@ def move_by_button(ins):
     if(readed==3):
         sleep(1)
         move_me(instruments[ins],2)
-        print("moving down")
+        print("moving up")
     if(readed==2) or (readed==4):
         sleep(1)
         move_me(instruments[ins],3)
-        print("moving up")
+        print("moving down")
         return
 #button_counter=0
 #button_long_hold_time=3
@@ -244,6 +249,8 @@ while True:
                         if(how_long>button_long_hold_time):
                             #drop down or up all
                             print("full")
+                            reset_by_button()
+                            print("done")
                             pass
                         else:
                             print("counter")
