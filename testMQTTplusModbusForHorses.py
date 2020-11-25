@@ -8,6 +8,9 @@ import serial.tools.list_ports
 from gpiozero import Button
 
 button = Button(2, True)
+button_counter=0
+button_long_hold_time=3
+button_decision_time=2
 #
 ports = serial.tools.list_ports.comports() #automatic searching of ports
 portArd = '1411' #change it for your arduino
@@ -135,34 +138,6 @@ client1.on_connect=on_connect
 client1.connect(broker,port)
 client1.loop_start()
 
-
-bol=1
-x=0
-while True:
-    try:
-        x=x+1
-        break # quit the loop if successful
-    except:
-        # error 
-        pass
-print(x)
-""" def upd_me(instr, topic):
-    started=time()
-    done = 0
-    while (time()-started<10.0) and (done<1):
-        try:
-            g=instr.read_register(2,0)
-            client1.publish(topic,str(g))
-            print(g)
-            done = 1
-            break
-        except KeyboardInterrupt:
-            sys.exit()
-        except Exception as e:
-            print(e)
-            #continue
-        if(done==1):
-            break """
 def move_me(instr,dir):
     started=time()
     done = 0
@@ -178,6 +153,37 @@ def move_me(instr,dir):
             #continue
         if(done==1):
             break
-
+#button_counter=0
+#button_long_hold_time=3
+#button_decision_time=2
+was_pressed=0
+decision_made=1
 while True:
+    if button.is_pressed:
+        if(was_pressed==0):
+            was_pressed=1
+            started_at=time()  
+    else:
+        print("Released")
+        if(was_pressed==1):
+            button_counter=button_counter+1
+            decison_made=0
+            count_decision=time()
+            how_long=time()-started_at
+            was_pressed=0
+        else:
+            if(decision_made==0):
+                if(time()-count_decision>button_decision_time):
+                    if(button_counter>0):
+                        if(how_long>button_long_hold_time):
+                            #drop down or up all
+                            print("full")
+                            pass
+                        else:
+                            print("counter")
+                            print(button_counter)
+                            #counter switch
+                            pass
+                    button_counter=0
+                    decision_made=1
     sleep(0.2)     
