@@ -56,7 +56,7 @@ void setup()
   modbus_configure(&Serial, 4800, SERIAL_8N2, MODBUS_ID, 7, HOLDING_REGS_SIZE, holdingRegs);
   modbus_update_comms(4800, SERIAL_8N2, MODBUS_ID);
   //attachInterrupt(1, myEventListener, RISING);
-  //calibration();
+  calibration();
 }
 
 void myEventListener() {
@@ -68,7 +68,81 @@ void myEventListener() {
     end_found = 1;
   }
 }
+void calibration2() {
+  int calibration_time = 10000; // максимальное время подъема
+  end_found = 0;
+  int break_point = 0;
+  delay(5000*MODBUS_ID);
+  unsigned long check_started = millis();
+  digitalWrite(DOWN_M, 1);
+  tone(PWM_M, 1000);
+  delay(300);
+  tone(PWM_M, 2000);
+  delay(300);
+  tone(PWM_M, 3000);
+  delay(300);
+  noTone(PWM_M);
+  //digitalWrite(DOWN_M, 0);
+  //move down for 2 sec
+  digitalWrite(DOWN_M, 1);
+  delay(30);
+  for(int i = 0; i < 250; i++) {
+    analogWrite(PWM_M, i);
+    delay(2);
+  }
+  
+  delay(1000);
+  
+  for(int i = 255; i > 0; i--) {
+    analogWrite(PWM_M, i);
+    delay(2);
+  }
+  
+  analogWrite(PWM_M, 0);
+  delay(30);
+  digitalWrite(DOWN_M, 0);
+  delay(30);
+  ///////////////////////////////////////////////////////////////////////
+digitalWrite(UP_M, 0);
+  for(int i = 0; i < 200; i++) {
+    analogWrite(PWM_M, i);
+    delay(8);
+    if(digitalRead(END_SWITCH)) {
+      delay(1);
+      if(digitalRead(END_SWITCH)) {
+        digitalWrite(PWM_M, 0);
+        break_point = 1;
+        break;
+      }
+    }
+  }
 
+  if(!break_point) {
+    for(int i = 0; i < calibration_time; i++) {
+      delay(1);
+      if(digitalRead(END_SWITCH)) {
+        delay(1);
+        if(digitalRead(END_SWITCH)) {
+          stop_moving();
+          break_point = 1;
+        }
+      }
+    }
+  }
+
+  if(!break_point) {
+    stop_moving(); //pizdec/ motor is not calibrate
+  }
+  
+  if (end_found) {
+    holdingRegs[LAST_COMMAND] = 2;
+    holdingRegs[ENABLING] = 1;
+    holdingRegs[STATE_NOW] = 2;
+  } else {
+    holdingRegs[ENABLING] = 2;
+  }
+
+}
 void calibration() {
   int calibration_time = 10000; // максимальное время подъема
   end_found = 0;
@@ -94,7 +168,7 @@ void calibration() {
   delay(30);
   digitalWrite(UP_M, 1);
   delay(30);
-  while (digitalRead(END_SWITH)!=endSwitchStopValue && (millis() - check_started < calibration_time)) {
+  while (digitalRead(END_SWITCH)!=endSwitchStopValue && (millis() - check_started < calibration_time)) {
     analogWrite(PWM_M, 150);
   }
   stop_moving();
