@@ -7,7 +7,7 @@ import serial
 import serial.tools.list_ports
 from gpiozero import Button
 
-button = Button(2, True)
+button = Button(26, True)
 button_counter=0
 button_long_hold_time=3
 button_decision_time=2
@@ -98,13 +98,15 @@ def on_connect(mqttc, obj, flags, rc):
 def on_publish(client,userdata,result):             #create function for callback
     print("data published \n")
     pass
+on_resetting=0
 def on_message(client, userdata, message):
-    global changed
+    global on_resetting
     print("message received " ,str(message.payload.decode("utf-8")))
     print("message topic=",message.topic)
     print("message qos=",message.qos)
     print("message retain flag=",message.retain)
     #3 down 2 - up 1 stop
+    #add if on resetting
     if(message.topic=="food/1"):
         move_me(instr1,int(str(message.payload.decode("utf-8"))))
         #upd_me(instr1,"food/return/1")
@@ -164,16 +166,18 @@ while True:
             was_pressed=1
             started_at=time()  
     else:
-        print("Released")
+        #print("Released")
         if(was_pressed==1):
             button_counter=button_counter+1
-            decison_made=0
+            decision_made=0
             count_decision=time()
             how_long=time()-started_at
             was_pressed=0
+            print("pressed")
         else:
             if(decision_made==0):
                 if(time()-count_decision>button_decision_time):
+                    print("it's time")
                     if(button_counter>0):
                         if(how_long>button_long_hold_time):
                             #drop down or up all
@@ -186,4 +190,6 @@ while True:
                             pass
                     button_counter=0
                     decision_made=1
+                else:
+                    print("not time")
     sleep(0.2)     
