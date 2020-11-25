@@ -9,7 +9,7 @@
 #define CURRENT A0
 
 //CONFIGURABLE
-#define MODBUS_ID 1
+#define MODBUS_ID 5
 
 #define MAX_UP_TIME 15000
 #define MAX_DOWN_TIME 8000
