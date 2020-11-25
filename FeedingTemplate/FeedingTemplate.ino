@@ -56,7 +56,7 @@ void setup()
   modbus_configure(&Serial, 4800, SERIAL_8N2, MODBUS_ID, 7, HOLDING_REGS_SIZE, holdingRegs);
   modbus_update_comms(4800, SERIAL_8N2, MODBUS_ID);
   attachInterrupt(1, myEventListener, RISING);
-  calibration();
+  //calibration();
 }
 
 void myEventListener() {
