@@ -5,6 +5,9 @@ from time import *
 import sys
 import serial
 import serial.tools.list_ports
+from gpiozero import Button
+
+button = Button(2, True)
 #
 ports = serial.tools.list_ports.comports() #automatic searching of ports
 portArd = '1411' #change it for your arduino
