@@ -139,7 +139,26 @@ client1.on_message=on_message
 client1.on_connect=on_connect
 client1.connect(broker,port)
 client1.loop_start()
-instuments = {1: instr1, 2: instr2, 3: instr3, 4: instr4, 5: instr5}
+instruments = {1: instr1, 2: instr2, 3: instr3, 4: instr4, 5: instr5}
+def read_me(instr,reg):
+    started=time()
+    done = 0
+    value=0
+    while (time()-started<10.0) and (done<1):
+        try:
+            value=instr.read_register(reg,0)
+            done = 1
+            break
+        except KeyboardInterrupt:
+            sys.exit()
+        except Exception as e:
+            value=0
+            print(e)
+            #continue
+        if(done==1):
+            break
+    return value
+    
 def move_me(instr,dir):
     started=time()
     done = 0
@@ -156,12 +175,19 @@ def move_me(instr,dir):
         if(done==1):
             break
 def move_by_button(ins):
-    if(instruments[ins].read_register(3,0)==3):
+    global instruments
+    readed=read_me(instruments[ins],3)
+    print("got from device:")
+    print(readed)
+    if(readed==3):
         sleep(1)
-        instruments[ins].write_register(1,2,0)
-    if(instruments[ins].read_register(3,0)==2):
+        move_me(instruments[ins],2)
+        print("moving down")
+    if(readed==2) or (readed==4):
         sleep(1)
-        instruments[ins].write_register(1,3,0)
+        move_me(instruments[ins],3)
+        print("moving up")
+        return
 #button_counter=0
 #button_long_hold_time=3
 #button_decision_time=2
