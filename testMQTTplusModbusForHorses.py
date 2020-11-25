@@ -174,6 +174,30 @@ def move_me(instr,dir):
             #continue
         if(done==1):
             break
+def reset_by_button():
+    global instruments
+    readed1=read_me(instruments[1],3)
+    readed2=read_me(instruments[1],3)
+    readed3=read_me(instruments[1],3)
+    readed4=read_me(instruments[1],3)
+    readed5=read_me(instruments[1],3)
+#   #not correct
+    if((readed1==4)or(readed1==2))and((readed2==4)or(readed2==2))and((readed3==4)or(readed3==2))and((readed4==4)or(readed4==2))and((readed5==4)or(readed5==2))
+    func=0
+    if((readed==4)or(readed==2)):
+        func=3
+    if(readed==3):
+        func=2
+    move_me(instr1,func)
+    sleep(20)
+    move_me(instr2,func)
+    sleep(20)
+    move_me(instr3,func)
+    sleep(20)
+    move_me(instr4,func)
+    sleep(20)
+    move_me(instr5,func)
+    sleep(20)
 def move_by_button(ins):
     global instruments
     readed=read_me(instruments[ins],3)
