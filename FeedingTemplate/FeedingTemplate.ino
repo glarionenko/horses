@@ -5,7 +5,7 @@
 #define PWM_M 5
 #define UP_M A3
 #define DOWN_M A2
-#define END_SWITCH 4
+#define END_SWITCH 3
 #define CURRENT A0
 
 //CONFIGURABLE
@@ -13,7 +13,7 @@
 
 #define MAX_UP_TIME 15000
 #define MAX_DOWN_TIME 8000
-boolean endSwitchStopValue = false;
+boolean endSwitchStopValue = true;
 int time_for_motion_down = MAX_DOWN_TIME;
 int time_for_motion_up = MAX_UP_TIME;
 //END OF CONFIGURABLE
@@ -45,7 +45,7 @@ void setup()
 {
   //объявить пин для датчика холла
   pinMode(END_SWITCH, INPUT_PULLUP);
-  pinMode(4, INPUT_PULLUP);
+  //pinMode(3, INPUT_PULLUP);
   pinMode(PWM_M, OUTPUT);
   pinMode(UP_M, OUTPUT);
   pinMode(DOWN_M, OUTPUT);
@@ -55,7 +55,7 @@ void setup()
   pinMode(LED, OUTPUT);
   modbus_configure(&Serial, 4800, SERIAL_8N2, MODBUS_ID, 7, HOLDING_REGS_SIZE, holdingRegs);
   modbus_update_comms(4800, SERIAL_8N2, MODBUS_ID);
-  attachInterrupt(1, myEventListener, RISING);
+  //attachInterrupt(1, myEventListener, RISING);
   //calibration();
 }
 
@@ -94,7 +94,7 @@ void calibration() {
   delay(30);
   digitalWrite(UP_M, 1);
   delay(30);
-  while ((end_found == 0) && (millis() - check_started < calibration_time)) {
+  while (digitalRead(END_SWITH)!=endSwitchStopValue && (millis() - check_started < calibration_time)) {
     analogWrite(PWM_M, 150);
   }
   stop_moving();
@@ -158,15 +158,15 @@ boolean cmd_changed() {
     changed = true;
     holdingRegs[LAST_COMMAND] = holdingRegs[ROTATION];
     //переключение прерываний
-
+/*
     if ( holdingRegs[LAST_COMMAND] == 2) {
-      attachInterrupt(1, myEventListener, RISING);
+      //attachInterrupt(1, myEventListener, RISING);
       delay(5);
     } else if (holdingRegs[LAST_COMMAND] == 3) {
-      detachInterrupt(digitalPinToInterrupt(3));
+      //detachInterrupt(digitalPinToInterrupt(3));
       delay(5);
     }
-
+*/
   }
   return changed;
 }
