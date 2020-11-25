@@ -139,7 +139,7 @@ client1.on_message=on_message
 client1.on_connect=on_connect
 client1.connect(broker,port)
 client1.loop_start()
-
+instuments = {1: instr1, 2: instr2, 3: instr3, 4: instr4, 5: instr5}
 def move_me(instr,dir):
     started=time()
     done = 0
@@ -155,6 +155,13 @@ def move_me(instr,dir):
             #continue
         if(done==1):
             break
+def move_by_button(ins):
+    if(instruments[ins].read_register(3,0)==3):
+        sleep(1)
+        instruments[ins].write_register(1,2,0)
+    if(instruments[ins].read_register(3,0)==2):
+        sleep(1)
+        instruments[ins].write_register(1,3,0)
 #button_counter=0
 #button_long_hold_time=3
 #button_decision_time=2
@@ -186,6 +193,8 @@ while True:
                         else:
                             print("counter")
                             print(button_counter)
+                            if(button_counter<=5):
+                                move_by_button(button_counter)
                             #counter switch
                             pass
                     button_counter=0
