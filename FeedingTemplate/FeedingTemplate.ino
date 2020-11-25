@@ -9,15 +9,16 @@
 #define CURRENT A0
 
 //CONFIGURABLE
-#define MODBUS_ID 5
+#define MODBUS_ID 1
 
 #define MAX_UP_TIME 15000
 #define MAX_DOWN_TIME 8000
 boolean endSwitchStopValue = true;
+
 int time_for_motion_down = MAX_DOWN_TIME;
 int time_for_motion_up = MAX_UP_TIME;
 //END OF CONFIGURABLE
-
+boolean calibrated=1;
 enum
 {
   // just add or remove registers and your good to go...
@@ -56,6 +57,12 @@ void setup()
   modbus_configure(&Serial, 4800, SERIAL_8N2, MODBUS_ID, 7, HOLDING_REGS_SIZE, holdingRegs);
   modbus_update_comms(4800, SERIAL_8N2, MODBUS_ID);
   //attachInterrupt(1, myEventListener, RISING);
+  for(int i = 6; i > 0; i--) {
+    digitalWrite(LED,HIGH);
+    delay(1000);
+    digitalWrite(LED,LOW);
+    delay(1000);
+  }
   calibration();
 }
 
@@ -141,7 +148,7 @@ digitalWrite(UP_M, 0);
   } else {
     holdingRegs[ENABLING] = 2;
   }
-
+holdingRegs[LAST_COMMAND] =4;
 }
 void calibration() {
   int calibration_time = 10000; // максимальное время подъема
@@ -179,7 +186,7 @@ void calibration() {
   } else {
     holdingRegs[ENABLING] = 2;
   }
-
+holdingRegs[LAST_COMMAND] =4;
 }
 
 boolean checkTime(unsigned long started, int timer) {
@@ -231,6 +238,9 @@ boolean cmd_changed() {
   if ((holdingRegs[ROTATION] != 0) && (holdingRegs[ROTATION] != holdingRegs[LAST_COMMAND])) {
     changed = true;
     holdingRegs[LAST_COMMAND] = holdingRegs[ROTATION];
+    if(holdingRegs[ROTATION]==4){
+      calibrated=0;
+      }
     //переключение прерываний
 /*
     if ( holdingRegs[LAST_COMMAND] == 2) {
@@ -252,6 +262,7 @@ int step_time = stop_in / (max_sp - min_sp); // время через котор
 int start_stopping_at = 5000;
 unsigned long last_update;
 boolean in_progress = 0;
+
 void move_it(int _rotation_cmd) {
   switch (_rotation_cmd) {
     case 1:
@@ -306,7 +317,10 @@ void move_it(int _rotation_cmd) {
       }
       break;
     case 4:
+    if(calibrated==0){
       calibration();
+      calibrated=1;
+    }
       break;
 
   }
